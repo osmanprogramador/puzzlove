@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Qual é o Filme? | Nossa sessão a dois</title>
+  <meta name="description" content="Jogo para adivinhar filmes, séries e programas com uma dica de abertura e seis pistas visuais. Inclui uma seleção especial de Natal.">
+  
+  <link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+
+  <div id="app-container">
+    <!-- BARRA SUPERIOR DE ESTÚDIO -->
+    <header class="app-header">
+      <div class="brand">
+        <svg class="brand-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+          <line x1="7" y1="2" x2="7" y2="22"></line>
+          <line x1="17" y1="2" x2="17" y2="22"></line>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <line x1="2" y1="7" x2="7" y2="7"></line>
+          <line x1="2" y1="17" x2="7" y2="17"></line>
+          <line x1="17" y1="17" x2="22" y2="17"></line>
+          <line x1="17" y1="7" x2="22" y2="7"></line>
+        </svg>
+        <div class="brand-text">
+          <h1>QUAL É O FILME</h1>
+          <span class="brand-sub">STUDIO EDITION</span>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <button id="btn-sound-toggle" class="control-btn" title="Alternar Áudio" aria-label="Som">
+          <svg id="svg-sound-on" class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <svg id="svg-sound-off" class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+
+        <button id="btn-home" class="control-btn" title="Voltar ao Menu" aria-label="Menu" style="display: none;">
+          <svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- TELA 1: CONFIGURAÇÃO / LOBBY -->
+    <main id="screen-lobby" class="screen active">
+      <div class="studio-card lobby-panel">
+        <div class="lobby-header">
+          <span class="live-tag">MESA DE DISPUTA</span>
+          <h2>CONFIGURAR PARTIDA</h2>
+          <p>
+            Uma sessão de cinema a dois. Anotem os palpites em papel ou numa lousa e revelem as cenas, uma de cada vez.
+          </p>
+        </div>
+
+        <!-- NOMES DOS JOGADORES -->
+        <div class="setup-group">
+          <div class="group-label">COMPETIDORES</div>
+          <div class="competitors-grid">
+            <div class="competitor-box p1">
+              <label class="player-tag" for="input-p1-name">JOGADOR 01</label>
+              <input type="text" id="input-p1-name" value="Jogador 1" maxlength="15" placeholder="Nome">
+            </div>
+
+            <div class="competitor-box p2">
+              <label class="player-tag" for="input-p2-name">JOGADOR 02</label>
+              <input type="text" id="input-p2-name" value="Jogador 2" maxlength="15" placeholder="Nome">
+            </div>
+          </div>
+        </div>
+
+        <!-- CATEGORIAS -->
+        <div class="setup-group">
+          <div class="group-label">GÊNERO / CATEGORIA</div>
+          <div class="categories-selector" id="categories-container">
+            <button type="button" class="cat-pill selected" data-category="todos">Todos os Gêneros</button>
+            <button type="button" class="cat-pill" data-category="ficcao">Ficção e Fantasia</button>
+            <button type="button" class="cat-pill" data-category="animacao">Animação</button>
+            <button type="button" class="cat-pill" data-category="acao">Ação e Aventura</button>
+            <button type="button" class="cat-pill" data-category="classicos">Clássicos do Cinema</button>
+            <button type="button" class="cat-pill" data-category="series">Séries de TV</button>
+            <button type="button" class="cat-pill" data-category="comedia">Comédia e Nacional</button>
+            <button type="button" class="cat-pill" data-category="romance">Romance</button>
+            <button type="button" class="cat-pill" data-category="anime">Animes</button>
+            <button type="button" class="cat-pill" data-category="programas">Programas e Reality</button>
+            <button type="button" class="cat-pill" data-category="esportes">Esportes e Documentários</button>
+            <button type="button" class="cat-pill" data-category="natal">Natal</button>
+          </div>
+        </div>
+
+        <!-- QUANTIDADE DE RODADAS -->
+        <div class="setup-group">
+          <div class="group-label">DURAÇÃO DO CONFRONTO</div>
+          <div class="rounds-grid" id="rounds-container" role="group" aria-label="Quantidade de títulos">
+          </div>
+        </div>
+
+        <div class="setup-group">
+          <label class="group-label" for="scoring-mode">QUANDO CONFERIR OS PALPITES?</label>
+          <select id="scoring-mode" class="game-select">
+            <option value="final" selected>No final — como no canal</option>
+            <option value="immediate">Na hora — marcar o acerto imediatamente</option>
+          </select>
+        </div>
+
+        <p id="catalog-status" class="catalog-status" role="status"></p>
+        <details class="how-to"><summary>Como jogar</summary><p>No modo “No final”, cada pessoa anota um palpite por imagem sem contar ao outro. Após a sexta imagem, revelem o título, confiram as lousas e escolham a primeira imagem em que cada um acertou: 1ª = 6 pontos, 2ª = 5, 3ª = 4, 4ª = 3, 5ª = 2, 6ª = 1; nenhum acerto = 0. No modo “Na hora”, usem os botões para pontuar assim que acertarem; revelar o título encerra a rodada sem pontos. As pistas incluem cenas, divulgação e recortes. Rever imagens não muda os pontos.</p></details>
+
+        <!-- AÇÃO -->
+        <button id="btn-start-game" class="btn-action-primary">
+          INICIAR CONFRONTO
+        </button>
+      </div>
+    </main>
+
+    <!-- TELA 2: ARENA DO JOGO (MONITOR DE ENQUADRAMENTO DE CINEMA) -->
+    <main id="screen-game" class="screen">
+      <div class="game-arena">
+        <!-- PLACAR DE TRANSMISSÃO -->
+        <div class="broadcast-bar">
+          <div class="broadcast-meta">
+            <span class="match-counter" id="badge-round">RODADA 01 / 10</span>
+            <span class="genre-badge" id="tag-category">FICÇÃO CIENTÍFICA</span>
+          </div>
+
+          <div class="live-scores" aria-live="polite" aria-atomic="true">
+            <div class="score-pod p1">
+              <span class="score-p-name" id="display-p1-name">Jogador 1</span>
+              <span class="score-p-val" id="display-p1-score">0</span>
+            </div>
+            <div class="score-pod p2">
+              <span class="score-p-name" id="display-p2-name">Jogador 2</span>
+              <span class="score-p-val" id="display-p2-score">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DICA INICIAL -->
+        <div class="hint-strip">
+          <div class="hint-meta">
+            <span class="hint-indicator">DICA DE ABERTURA</span>
+            <span class="hint-points-status" id="badge-current-points">VALE 6 PONTOS</span>
+          </div>
+          <p class="hint-content" id="display-initial-hint" tabindex="-1">
+            Carregando informações da produção...
+          </p>
+          <details class="synopsis-box" id="game-synopsis">
+            <summary>Ver sinopse (ajuda opcional)</summary>
+            <p id="game-synopsis-text"></p>
+          </details>
+        </div>
+
+        <!-- MONITOR DE CINEMA -->
+        <div class="monitor-wrapper">
+          <!-- SEGMENTOS DAS 6 ETAPAS -->
+          <div class="film-stepper" id="stages-stepper">
+            <!-- 6 etapas geradas dinamicamente -->
+          </div>
+
+          <!-- ENQUADRAMENTO DA TELA 16:9 -->
+          <div class="monitor-screen" id="frame-container">
+            <!-- RETÍCULAS DE VISOR DE CÂMERA -->
+            <div class="reticle top-left"></div>
+            <div class="reticle top-right"></div>
+            <div class="reticle bottom-left"></div>
+            <div class="reticle bottom-right"></div>
+
+            <img id="current-frame-img" alt="Frame cinematográfico" class="screen-image">
+
+            <!-- FALLBACK ELEGANTE -->
+            <div class="screen-fallback" id="frame-placeholder" role="status" style="display: none;">
+              <span class="fallback-code" id="placeholder-title">FRAME 01</span>
+              <span class="fallback-note" id="placeholder-desc">Cena da produção cinematográfica</span>
+            </div>
+
+            <!-- TIMECODE / OVERLAY METADATA -->
+            <div class="monitor-osd">
+              <span class="osd-stage" id="badge-stage-number">ETAPA 01 / 06</span>
+              <span class="osd-points" id="badge-stage-points">6 PTS</span>
+            </div>
+          </div>
+
+          <!-- NAVEGAÇÃO DE FRAMES -->
+          <div class="monitor-controls">
+            <button id="btn-prev-frame" class="btn-step-nav" disabled>
+              ANTERIOR
+            </button>
+
+            <span class="step-indicator-text" id="label-frame-counter">
+              FRAME 01 REVELADO
+            </span>
+
+            <button id="btn-next-stage" class="btn-step-nav active-action">
+              PRÓXIMO FRAME →
+            </button>
+          </div>
+        </div>
+
+        <!-- MESA DE DECISÃO DAS LOUSAS -->
+        <div class="judge-deck">
+          <div class="deck-header">
+            <h3 id="judge-deck-title">CONFERÊNCIA NO FINAL</h3>
+            <span id="judge-deck-caption">Anotem um palpite para cada imagem</span>
+          </div>
+
+          <p id="delayed-scoring-note" class="delayed-scoring-note">Guardem os palpites em segredo. Depois da sexta imagem, confiram a resposta e marquem o primeiro acerto de cada pessoa.</p>
+          <div class="deck-buttons" id="judge-instant-buttons" hidden>
+            <button class="btn-deck p1-score" id="btn-judge-p1">
+              <span class="deck-player" id="judge-label-p1">Jogador 1</span>
+              <span class="deck-pts" id="judge-pts-p1">+6 PTS</span>
+            </button>
+
+            <button class="btn-deck p2-score" id="btn-judge-p2">
+              <span class="deck-player" id="judge-label-p2">Jogador 2</span>
+              <span class="deck-pts" id="judge-pts-p2">+6 PTS</span>
+            </button>
+
+            <button class="btn-deck both-score" id="btn-judge-both">
+              <span class="deck-player">Ambos Acertaram</span>
+              <span class="deck-pts" id="judge-pts-both">+6 PTS CADA</span>
+            </button>
+
+            <button class="btn-deck none-score" id="btn-judge-none">
+              <span class="deck-player" id="label-judge-none">Nenhum Acerto</span>
+              <span class="deck-pts" id="desc-judge-none">Próximo Frame (-1 pt)</span>
+            </button>
+          </div>
+
+          <div class="deck-footer">
+            <button id="btn-show-answer-direct" class="btn-direct-reveal">
+              REVELAR TÍTULO DA PRODUÇÃO
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- TELA 3: RESULTADO FINAL / PÓDIO -->
+    <main id="screen-victory" class="screen">
+      <div class="studio-card victory-panel">
+        <span class="live-tag">ENCERRAMENTO DA TRANSMISSÃO</span>
+        <h2 id="victory-title" tabindex="-1">VITÓRIA DE JOGADOR 1</h2>
+        <p class="victory-lead" id="victory-subtitle">Confronto finalizado com sucesso.</p>
+
+        <div class="result-breakdown">
+          <div class="result-block p1" id="podium-box-p1">
+            <span class="result-tag" id="badge-p1-winner" style="display: none;">VENCEDOR</span>
+            <span class="result-name" id="podium-name-p1">Jogador 1</span>
+            <span class="result-score" id="podium-points-p1">0</span>
+            <span class="result-label">PONTOS</span>
+          </div>
+
+          <div class="result-block p2" id="podium-box-p2">
+            <span class="result-tag" id="badge-p2-winner" style="display: none;">VENCEDOR</span>
+            <span class="result-name" id="podium-name-p2">Jogador 2</span>
+            <span class="result-score" id="podium-points-p2">0</span>
+            <span class="result-label">PONTOS</span>
+          </div>
+        </div>
+
+        <div class="victory-actions-grid">
+          <button id="btn-rematch" class="btn-action-primary">
+            JOGAR REVANCHE
+          </button>
+          <button id="btn-back-menu" class="btn-action-secondary">
+            MENU PRINCIPAL
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- MODAL DE RESPOSTA / DADOS DO FILME -->
+    <div class="modal-overlay" id="modal-answer" role="dialog" aria-modal="true" aria-labelledby="modal-movie-title" aria-describedby="modal-round-result" tabindex="-1">
+      <div class="modal-sheet">
+        <div class="sheet-header">
+          <span class="sheet-category" id="modal-cat-badge">CATEGORIA</span>
+          <h2 class="sheet-title" id="modal-movie-title">TÍTULO DO FILME</h2>
+          <span class="sheet-original" id="modal-movie-original">Original: Title (Year)</span>
+        </div>
+
+        <p id="modal-round-result" class="round-result"></p>
+        <div id="deferred-score-panel" class="deferred-score-panel" hidden>
+          <p>Confiram seus palpites. Em qual imagem cada pessoa acertou pela primeira vez?</p>
+          <div class="score-choices">
+            <div>
+              <label id="score-choice-label-p1" for="score-choice-p1">Jogador 1</label>
+              <select id="score-choice-p1" class="game-select">
+                <option value="">Escolha o primeiro acerto</option>
+                <option value="1">1ª imagem — 6 pontos</option>
+                <option value="2">2ª imagem — 5 pontos</option>
+                <option value="3">3ª imagem — 4 pontos</option>
+                <option value="4">4ª imagem — 3 pontos</option>
+                <option value="5">5ª imagem — 2 pontos</option>
+                <option value="6">6ª imagem — 1 ponto</option>
+                <option value="0">Não acertei — 0 pontos</option>
+              </select>
+            </div>
+            <div>
+              <label id="score-choice-label-p2" for="score-choice-p2">Jogador 2</label>
+              <select id="score-choice-p2" class="game-select">
+                <option value="">Escolha o primeiro acerto</option>
+                <option value="1">1ª imagem — 6 pontos</option>
+                <option value="2">2ª imagem — 5 pontos</option>
+                <option value="3">3ª imagem — 4 pontos</option>
+                <option value="4">4ª imagem — 3 pontos</option>
+                <option value="5">5ª imagem — 2 pontos</option>
+                <option value="6">6ª imagem — 1 ponto</option>
+                <option value="0">Não acertei — 0 pontos</option>
+              </select>
+            </div>
+          </div>
+          <p id="deferred-score-preview" role="status" aria-live="polite"></p>
+        </div>
+        <div class="sheet-data-table">
+          <div class="data-col">
+            <span class="col-k">LANÇAMENTO</span>
+            <span class="col-v" id="modal-movie-year">2010</span>
+          </div>
+          <div class="data-col">
+            <span class="col-k">DIREÇÃO / CRIAÇÃO</span>
+            <span class="col-v" id="modal-movie-director">Diretor</span>
+          </div>
+        </div>
+
+        <div class="sheet-notes">
+          <span class="notes-title">SOBRE A PRODUÇÃO</span>
+          <p id="modal-movie-trivia">Nota de produção do filme.</p>
+        </div>
+
+        <details class="synopsis-box" id="modal-synopsis">
+          <summary id="modal-synopsis-toggle">Ver sinopse</summary>
+          <p id="modal-synopsis-text"></p>
+        </details>
+
+        <button id="btn-modal-next" class="btn-action-primary" style="width: 100%;">
+          AVANÇAR PARA A PRÓXIMA RODADA →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <noscript>Ative o JavaScript no navegador para jogar.</noscript>
+  <script src="database.js?v=5"></script>
+  <script src="app.js?v=5"></script>
+</body>
+</html>

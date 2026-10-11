@@ -55,3 +55,5 @@ Verificações adicionais: node scripts/test-rounds.mjs testa alternância e enc
 A interface completa é publicada em https://osmanprogramador.github.io/puzzlove/ pelo workflow Publicar o jogo. Inclui os dois jogos, as fotos e o álbum. npm run build:pages gera pages-dist. O servidor de salas permanece separado, com D1; PUZZLOVE_API_ORIGIN pode selecionar outro servidor na compilação. A API permite o acesso dessa interface pelo domínio https://osmanprogramador.github.io e mantém a identificação dos jogadores por token de sala. Não há redirecionamento para o servidor ao jogar.
 
 O endereço atual do servidor fica em vite.pages.config.ts e pode ser substituído por PUZZLOVE_API_ORIGIN na compilação. O site antigo não é mais consultado.
+
+O código completo do servidor publicado está na pasta server/ do repositório GitHub. Seu manifesto tem a identidade do servidor novo; o manifesto da raiz é histórico e pertence ao site anterior. Para alterar e publicar a API, use o projeto server/ e preserve seu project_id.

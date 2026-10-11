@@ -1,0 +1,1 @@
+export default function Home(){return <main style={{fontFamily:'system-ui',maxWidth:600,margin:'80px auto',padding:24}}><h1>Puzzlove</h1><p>Servidor das salas de jogos.</p><a href="https://osmanprogramador.github.io/puzzlove/">Abrir o jogo</a></main>;}

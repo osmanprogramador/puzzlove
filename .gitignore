@@ -55,5 +55,5 @@ next-env.d.ts
 /outputs/
 /work/
 
-# Cache de compilação TypeScript
+/pages-dist/
 *.tsbuildinfo

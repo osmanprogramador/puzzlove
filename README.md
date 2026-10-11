@@ -2,11 +2,9 @@
 
 Jogo online para duas pessoas, com salas por código de convite de 8 caracteres.
 
-[**▶ Jogar agora — filmes e quebra-cabeças**](https://pecas-do-tempo-osman.osmananalisedesistem.chatgpt.site/)
+[**▶ Jogar agora — filmes e quebra-cabeças**](https://osmanprogramador.github.io/puzzlove/)
 
-Código-fonte completo do site publicado, mantido em [osmanprogramador/puzzlove](https://github.com/osmanprogramador/puzzlove). Não é necessário instalar nada para jogar pelo link acima.
-
-1. Escolha Quebra-cabeça ou Qual é o Filme?, preencha seu nome e crie a sala.
+1. A tela inicial oferece Quebra-cabeça e Qual é o Filme?. Escolha o jogo, preencha seu nome e crie a sala. Para um convite recebido, use Já tenho um código de convite.
 2. Envie o código ou o link do convite à outra pessoa. Ela informa o nome e entra.
 3. No quebra-cabeça, escolha 2 ou 3 rodadas. Quem cria escolhe a primeira foto e a quantidade de peças dentro da sala; a pessoa convidada escolhe a segunda; a terceira volta a quem criou.
 4. Cada participante clica em Estou pronto. Há uma contagem regressiva de 3 segundos.
@@ -51,3 +49,7 @@ Verificação: node scripts/test-online.mjs testa duas conexões HTTP, sincroniz
 Este é um único site: a página inicial oferece Qual é o Filme? e Quebra-cabeça, com seus modos. O código pode ser mantido num repositório GitHub. O GitHub Pages sozinho não executa a API nem o D1 necessários às salas online; a versão completa usa um servidor Cloudflare Workers com D1 (a hospedagem atual já está configurada). O filme local pode funcionar num site estático, mas isso não substitui as salas sincronizadas. Não coloque .env, tokens, .sites-runtime, bancos locais, node_modules ou arquivos de saída no repositório.
 
 Verificações adicionais: node scripts/test-rounds.mjs testa alternância e encerramento; node scripts/test-view.mjs confere o zoom em torno do ponto tocado e as dez fotos. As prévias responsivas devem cobrir celular em pé/deitado, tablet e desktop.
+
+## Publicação pelo GitHub
+
+A interface completa é publicada em https://osmanprogramador.github.io/puzzlove/ pelo workflow Publicar o jogo. Inclui os dois jogos, as fotos e o álbum. npm run build:pages gera pages-dist. O servidor de salas permanece separado, com D1; PUZZLOVE_API_ORIGIN pode selecionar outro servidor na compilação. A API permite o acesso dessa interface pelo domínio https://osmanprogramador.github.io e mantém a identificação dos jogadores por token de sala. Não há redirecionamento para o servidor ao jogar.

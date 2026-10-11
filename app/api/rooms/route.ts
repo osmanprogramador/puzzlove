@@ -1,12 +1,13 @@
 import { env } from 'cloudflare:workers';
 import { applyAction, initialRoom, publicRoom, cleanName, normalizeRoom, type Room } from '../../../lib/game';
 export const dynamic='force-dynamic';
+import { allowedOrigin, withCors } from '../../../lib/cors';
 const json=(data:any,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
 const hash=async(token:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token)))).map(n=>n.toString(16).padStart(2,'0')).join('');
 const random=(n:number)=>Array.from(crypto.getRandomValues(new Uint8Array(n))).map(n=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[n%32]).join('');
 async function read(code:string){return env.DB!.prepare('SELECT revision,data FROM rooms WHERE code=? AND expires>?').bind(code,Date.now()).first<{revision:number;data:string}>();}
-function sameOrigin(req:Request){const origin=req.headers.get('origin');return !origin||origin===new URL(req.url).origin;}
-export async function GET(req:Request) {
+function sameOrigin(req:Request){const origin=req.headers.get('origin');return !origin||origin===new URL(req.url).origin||allowedOrigin(origin);}
+async function getRoom(req:Request) {
   try {
     const url=new URL(req.url), code=url.searchParams.get('code')||'';
     const row=await read(code);if(!row)return json({error:'Sala não encontrada ou expirada.'},404);
@@ -16,7 +17,7 @@ export async function GET(req:Request) {
     return json(publicRoom(room,seat));
   }catch{return json({error:'Não foi possível acessar a sala. Tente novamente.'},503);}
 }
-export async function POST(req:Request) {
+async function postRoom(req:Request) {
   try {
     if(!sameOrigin(req))return json({error:'Origem inválida.'},403);
     if(Number(req.headers.get('content-length')||0)>100000)return json({error:'Pedido muito grande.'},413);
@@ -51,3 +52,7 @@ export async function POST(req:Request) {
     return json({error:'Sala ocupada, tente novamente.'},409);
   }catch{return json({error:'Não foi possível salvar. Confira a conexão e tente novamente.'},503);}
 }
+
+export async function GET(req:Request){return withCors(req,await getRoom(req));}
+export async function POST(req:Request){return withCors(req,await postRoom(req));}
+export async function OPTIONS(req:Request){return withCors(req,new Response(null,{status:allowedOrigin(req.headers.get('origin'))?204:403}));}

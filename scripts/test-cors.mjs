@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+const context={exports:{},Headers,Response};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/cors.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,context);
+const {allowedOrigin,withCors}=context.exports;
+assert.equal(allowedOrigin('https://osmanprogramador.github.io'),true);
+for(const origin of [null,'https://evil.example','https://osmanprogramador.github.io.evil.example','http://osmanprogramador.github.io'])assert.equal(allowedOrigin(origin),false);
+const response=withCors(new Request('https://server.example/api/rooms',{headers:{Origin:'https://osmanprogramador.github.io'}}),Response.json({error:'Sala não encontrada'}, {status:404}));
+assert.equal(response.status,404);
+assert.equal(response.headers.get('Access-Control-Allow-Origin'),'https://osmanprogramador.github.io');
+assert.equal(response.headers.get('Access-Control-Allow-Credentials'),null);
+assert.deepEqual(await response.json(),{error:'Sala não encontrada'});
+const blocked=withCors(new Request('https://server.example',{headers:{Origin:'https://evil.example'}}),new Response(null,{status:204}));
+assert.equal(blocked.headers.get('Access-Control-Allow-Origin'),null);
+console.log('CORS aceita apenas a interface do GitHub e preserva os erros e o conteúdo da API.');

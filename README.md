@@ -14,7 +14,7 @@ Jogo online para duas pessoas, com salas por código de convite de 8 caracteres.
 - Ao terminar uma rodada, vejam o resultado e avancem à próxima escolha, sem trocar de sala. A corrida termina assim que alguém completa o tabuleiro e vale um ponto. Uma partida de 2 rodadas pode empatar. No cooperativo, o histórico guarda o tempo de cada montagem.
 - Cooperativo: as duas pessoas montam o mesmo tabuleiro, com sincronização online.
 - Corrida: mesma foto, mesmas peças, mesma ordem na bandeja e início conjunto. Cada pessoa monta seu tabuleiro e acompanha o progresso da outra. O servidor registra o tempo de conclusão.
-- 100, 300, 500 ou 1.000 peças com abas e cavidades complementares.
+- 24, 48, 100, 300, 500 ou 1.000 peças com abas e cavidades complementares.
 - Arraste uma peça da bandeja à mesa. Uma peça incorreta continua solta e pode ser movida. Arraste-a de volta à bandeja ou selecione e use Devolver peça.
 - No celular, também é possível tocar para selecionar e depois tocar no destino. O zoom e Mover mesa ajudam com os quebra-cabeças maiores.
 - Só as bordas filtra as peças externas. A fotografia completa, o nome e o local ficam ocultos até a conclusão da rodada. Não há imagem-guia nem foto de referência durante a partida.
@@ -25,7 +25,7 @@ Jogo online para duas pessoas, com salas por código de convite de 8 caracteres.
 
 ## Cinema online
 
-O anfitrião configura o catálogo, avança as imagens e registra os resultados das duas lousas. A pessoa convidada acompanha as mesmas imagens e o placar. Ambos anotam seus palpites em papel e conferem juntos. As sinopses continuam ocultas por padrão. O catálogo anterior, com Natal e sem terror, foi preservado.
+O anfitrião configura o catálogo, avança as imagens e registra os resultados das duas lousas. A pessoa convidada acompanha as mesmas imagens e o placar. Cada pessoa registra seus palpites secretos por imagem no site; eles são revelados na última imagem. Também é possível continuar usando lousas físicas. As sinopses continuam ocultas por padrão. O catálogo anterior, com Natal e sem terror, foi preservado.
 
 O projeto original de filmes continua funcionando localmente e oferece o botão Jogar online. A cópia hospedada fica em public/filme.
 
@@ -54,6 +54,19 @@ Verificações adicionais: node scripts/test-rounds.mjs testa alternância e enc
 
 A interface completa é publicada em https://osmanprogramador.github.io/puzzlove/ pelo workflow Publicar o jogo. Inclui os dois jogos, as fotos e o álbum. npm run build:pages gera pages-dist. O servidor de salas permanece separado, com D1; PUZZLOVE_API_ORIGIN pode selecionar outro servidor na compilação. A API permite o acesso dessa interface pelo domínio https://osmanprogramador.github.io e mantém a identificação dos jogadores por token de sala. Não há redirecionamento para o servidor ao jogar.
 
-O endereço atual do servidor fica em vite.pages.config.ts e pode ser substituído por PUZZLOVE_API_ORIGIN na compilação. O site antigo não é mais consultado.
+O endereço atual do servidor fica em vite.pages.config.ts e pode ser substituído por PUZZLOVE_API_ORIGIN na compilação. O servidor ativo é https://pecas-do-tempo-osman.osmananalisedesistem.chatgpt.site; o endereço público para jogar continua sendo o GitHub.
 
-O código completo do servidor publicado está na pasta server/ do repositório GitHub. Seu manifesto tem a identidade do servidor novo; o manifesto da raiz é histórico e pertence ao site anterior. Para alterar e publicar a API, use o projeto server/ e preserve seu project_id.
+O código completo do servidor publicado está na pasta server/ do repositório GitHub. Seu manifesto preserva a identidade original do servidor e seu banco de salas. Para alterar e publicar a API, use o projeto server/ e preserve seu project_id.
+
+
+## Novidades da mesa
+
+- Filtros de borda/meio, três bandejas compartilhadas e embaralhamento local da ordem das peças.
+- Peças vizinhas podem formar conjuntos fora da posição final; a seleção bloqueia o conjunto inteiro até soltar. Peças já fixadas na posição correta permanecem no tabuleiro.
+- Verde e terracota identificam as seleções; o movimento mostra a posição da outra pessoa no modo juntos.
+- Desafios de 24, 48, 100, 300, 500 e 1.000 peças. Rotação opcional de peças soltas, definida na escolha de cada rodada; conjuntos são unidos na orientação correta.
+- Palpites por imagem guardados no servidor: cada pessoa vê os próprios, e os dois veem as respostas na última imagem ou ao revelar o título. Respostas de pistas anteriores ficam fechadas. O anfitrião confirma a primeira pista acertada na conferência final, preservando o placar e os modos de pontuação existentes.
+- Álbum local com data, tempo, tamanho, modo, rotação e participantes; histórico de todas as novas conclusões. Os destinos antigos já montados continuam revelados, sem inventar os dados de partidas anteriores.
+- Convite pelo WhatsApp, compartilhamento nativo quando disponível e QR code gerado no próprio navegador.
+
+Validação: testes de conjuntos, rotação, privacidade e rodadas em `scripts/test-features.mjs`; integração com dois participantes em `scripts/test-features-online.mjs` (usar TEST_URL para apontar ao servidor de teste).

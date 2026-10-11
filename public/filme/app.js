@@ -220,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.players[key] = { name: $(`input-${key}-name`).value.trim().slice(0, 15) || `Jogador ${key === 'p1' ? 1 : 2}`, score: 0 };
       storage.set(`movie_${key}_name`, state.players[key].name);
     }
+    if(typeof crypto!=='undefined'&&crypto.randomUUID)state.sessionId=crypto.randomUUID();
     state.deck = shuffle(pool).slice(0, effectiveRounds());
     state.totalRounds = state.deck.length;
     state.screen = 'game';
@@ -476,10 +477,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // A sessão online mantém a lógica local e transmite apenas o estado de jogo.
   if (typeof location !== 'undefined' && typeof URLSearchParams !== 'undefined' && new URLSearchParams(location.search).get('online') === '1' && window.parent !== window) {
     let onlineSeat = null;
+    const sessionId=crypto.randomUUID();
     let applying = false;
     let previous = '';
     const snapshot = () => ({
-      ...state, deck: state.deck.map(movie => movie.id),
+      ...state, sessionId:state.sessionId||sessionId, deck: state.deck.map(movie => movie.id),
       choices: ['p1', 'p2'].map(key => $(`score-choice-${key}`).value),
       modalOpen: modal.classList.contains('active')
     });
@@ -530,6 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (event.data.snapshot) receive(event.data.snapshot);
         if (onlineSeat === 1) guestMessage();
       }
+      if(event.data?.type==='movie-score-choice'&&onlineSeat===0&&modal.classList.contains('active')&&state.scoringMode==='final'){const key=event.data.seat===0?'p1':'p2',stage=event.data.stage;if(Number.isInteger(stage)&&stage>=-1&&stage<=5){$(`score-choice-${key}`).value=stage===-1?'0':String(stage+1);$(`score-choice-${key}`).dispatchEvent(new Event('change',{bubbles:true}));}}
       if (event.data?.type === 'movie-sync' && onlineSeat === 1) receive(event.data.snapshot);
     });
     // A pessoa convidada pode abrir sinopses, mas não avançar a partida do anfitrião.

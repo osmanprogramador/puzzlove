@@ -11,5 +11,5 @@ export const scenes = [
   {id:'forte',title:'O pátio do Forte das Cinco Pontas',city:'Recife · São José',era:'Contemporâneo',year:'2024',image:'/photos/forte.jpg',file:'Apr2024. Recife City Museum aka Museu da Cidade do Recife - Forte das Cinco Pontas 26.jpg',author:'Ridiculopathy',license:'CC0',licenseUrl:'https://creativecommons.org/publicdomain/zero/1.0/',story:'O pátio do Forte das Cinco Pontas, sede do Museu da Cidade do Recife, em abril de 2024.'},
 ] as const;
 export const surpriseName=(id:string)=>'Destino surpresa '+String(scenes.findIndex(s=>s.id===id)+1).padStart(2,'0');
-export const levels = [{n:100,cols:10,rows:10,label:'Um passeio'}, {n:300,cols:20,rows:15,label:'Uma tarde'}, {n:500,cols:25,rows:20,label:'Uma viagem'}, {n:1000,cols:40,rows:25,label:'Uma grande história'}];
+export const levels = [{n:24,cols:6,rows:4,label:'Uma pausa'}, {n:48,cols:8,rows:6,label:'Um encontro'}, {n:100,cols:10,rows:10,label:'Um passeio'}, {n:300,cols:20,rows:15,label:'Uma tarde'}, {n:500,cols:25,rows:20,label:'Uma viagem'}, {n:1000,cols:40,rows:25,label:'Uma grande história'}];
 export const sourceFor = (scene:typeof scenes[number]) => 'https://commons.wikimedia.org/wiki/File:'+encodeURIComponent(scene.file.replaceAll(' ','_'));

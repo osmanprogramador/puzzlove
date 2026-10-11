@@ -46,10 +46,12 @@ Verificação: node scripts/test-online.mjs testa duas conexões HTTP, sincroniz
 
 ## GitHub e hospedagem
 
-Este é um único site: a página inicial oferece Qual é o Filme? e Quebra-cabeça, com seus modos. O código pode ser mantido num repositório GitHub. O GitHub Pages sozinho não executa a API nem o D1 necessários às salas online; a versão completa usa um servidor Cloudflare Workers com D1 (a hospedagem atual já está configurada). O filme local pode funcionar num site estático, mas isso não substitui as salas sincronizadas. Não coloque .env, tokens, .sites-runtime, bancos locais, node_modules ou arquivos de saída no repositório.
+Este é um único site: a página inicial oferece Qual é o Filme? e Quebra-cabeça, com seus modos. O código pode ser mantido num repositório GitHub. O GitHub Pages sozinho não executa a API nem o D1 necessários às salas online; a versão completa usa um servidor Cloudflare Workers com D1 (o servidor das salas é publicado separadamente no Sites). O filme local pode funcionar num site estático, mas isso não substitui as salas sincronizadas. Não coloque .env, tokens, .sites-runtime, bancos locais, node_modules ou arquivos de saída no repositório.
 
 Verificações adicionais: node scripts/test-rounds.mjs testa alternância e encerramento; node scripts/test-view.mjs confere o zoom em torno do ponto tocado e as dez fotos. As prévias responsivas devem cobrir celular em pé/deitado, tablet e desktop.
 
 ## Publicação pelo GitHub
 
 A interface completa é publicada em https://osmanprogramador.github.io/puzzlove/ pelo workflow Publicar o jogo. Inclui os dois jogos, as fotos e o álbum. npm run build:pages gera pages-dist. O servidor de salas permanece separado, com D1; PUZZLOVE_API_ORIGIN pode selecionar outro servidor na compilação. A API permite o acesso dessa interface pelo domínio https://osmanprogramador.github.io e mantém a identificação dos jogadores por token de sala. Não há redirecionamento para o servidor ao jogar.
+
+O endereço atual do servidor fica em vite.pages.config.ts e pode ser substituído por PUZZLOVE_API_ORIGIN na compilação. O site antigo não é mais consultado.

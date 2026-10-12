@@ -89,3 +89,12 @@ Cada pessoa pode pular uma pergunta, guardar só para si ou escolher compartilha
 Leituras locais: Lucas 24:13–35; Mateus 6:5–13; Lucas 15:11–32; Mateus 18:21–35; Marcos 4:35–41; 1 Coríntios 13:1–7; João 13:1–17. Texto da Bíblia Portuguesa Mundial, tradução em revisão, domínio público, consultado em 11/10/2026 na [eBible](https://ebible.org/bible/details.php?id=porbrbsl). A origem de cada capítulo está em `lib/scripture.ts` e na tela de leitura. Explicações, desafios e perguntas são material de apoio do jogo; o casal pode usar sua própria Bíblia.
 
 Validação: `node scripts/test-journey.mjs` percorre os sete encontros e verifica consentimento, privacidade, avanço, pausa, passagens, backup, deduplicação e retomada autenticada. `node scripts/test-journey-online.mjs` testa uma jornada com dois clientes contra a API; use `TEST_URL` apenas com servidor de testes, pois o script cria salas.
+
+
+## Cinema integrado ao Puzzlove
+
+A tela online de Qual é o Filme? usa componentes do próprio Puzzlove. O iframe e sua rolagem interna foram retirados. A imagem ocupa a área principal, com pistas e navegação logo abaixo; o palpite fica ao lado no computador e abaixo no celular. Ampliar cinema utiliza a tela disponível e pode ser fechado com Reduzir ou Escape. O convite fica em uma seção recolhida durante a sessão.
+
+Configuração, placar, sinopse opcional, seis pistas, conferência e resultado agora fazem parte da mesma interface. Os 115 títulos e os 25 especiais de Natal foram preservados. A API existente e o formato dos estados de cinema são mantidos, permitindo continuar salas iniciadas na interface anterior sem republicar o servidor.
+
+`node scripts/export-cinema-catalog.mjs` gera `public/filme/catalog.json` a partir do catálogo original. `node scripts/test-cinema.mjs` verifica paridade dos títulos, ausência de repetição, progressão de pistas, pontuação final e imediata, revisão de imagens e compatibilidade com estados antigos. A versão local original continua disponível em `public/filme`.

@@ -4,3 +4,5 @@ import Game from '../app/Game';
 import '../app/globals.css';
 import '../app/journey.css';
 createRoot(document.getElementById('root')!).render(<Game/>);
+
+import '../app/cinema.css';

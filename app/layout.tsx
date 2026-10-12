@@ -23,3 +23,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+import './cinema.css';

@@ -98,3 +98,8 @@ A tela online de Qual é o Filme? usa componentes do próprio Puzzlove. O iframe
 Configuração, placar, sinopse opcional, seis pistas, conferência e resultado agora fazem parte da mesma interface. Os 115 títulos e os 25 especiais de Natal foram preservados. A API existente e o formato dos estados de cinema são mantidos, permitindo continuar salas iniciadas na interface anterior sem republicar o servidor.
 
 `node scripts/export-cinema-catalog.mjs` gera `public/filme/catalog.json` a partir do catálogo original. `node scripts/test-cinema.mjs` verifica paridade dos títulos, ausência de repetição, progressão de pistas, pontuação final e imediata, revisão de imagens e compatibilidade com estados antigos. A versão local original continua disponível em `public/filme`.
+
+
+A página das pistas ajusta a imagem ao espaço disponível entre o cabeçalho e os controles. A navegação e o palpite permanecem visíveis sem rolagem da página durante as pistas. A altura responde à tela, orientação e área visível do navegador. Em telas horizontais baixas, o cabeçalho da marca é recolhido e Sair da sala fica na barra do jogo. Sinopse abre em diálogo nativo com botão de fechar e Escape; histórico e convite são opcionais. Conferência e configuração podem mostrar conteúdos mais longos.
+
+Verificação de layout na prévia: larguras/alturas CSS 1365×768, 768×1024, 390×844, 320×666 e 768×480. Em todas, a altura do documento foi igual à da tela, não havia iframe e navegação, revelação e campo de palpite estavam dentro da área visível.

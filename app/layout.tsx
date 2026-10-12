@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./journey.css";
 
 export const metadata: Metadata = {
   title: "Peças do Tempo | Nossa mesa a dois",
-  description: "Lugares históricos, peça por peça. Quebra-cabeças cooperativos, corridas e sessões de cinema em salas para duas pessoas.",
+  description: "Quebra-cabeças, cinema e Caminho a Dois: encontros bíblicos cooperativos em salas para duas pessoas.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

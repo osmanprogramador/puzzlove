@@ -25,6 +25,7 @@ jobs:
       - run: npm ci
       - run: node --test tests/film.test.cjs
       - run: node scripts/test-features.mjs
+      - run: node scripts/test-journey.mjs
       - run: node scripts/test-rounds.mjs
       - run: node scripts/test-view.mjs
       - run: node scripts/test-cors.mjs

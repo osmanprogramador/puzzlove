@@ -1,0 +1,48 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import ts from 'typescript';
+import { webcrypto } from 'node:crypto';
+const cache=new Map();
+function load(file){file=path.resolve(file);if(cache.has(file))return cache.get(file);const exports={};cache.set(file,exports);vm.runInNewContext(ts.transpileModule(fs.readFileSync(file,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports,require:n=>load(path.resolve(path.dirname(file),n+'.ts')),crypto:webcrypto,Date,Error,fetch:(...a)=>fetch(...a)});return exports;}
+const {initialRoom,applyAction,publicRoom}=load('lib/game.ts'),{encounters}=load('lib/encounters.ts'),{scripture}=load('lib/scripture.ts');
+let now=100000;const room=initialRoom('JOURNEY1','a',{kind:'journey',mode:'race',count:24,name:'Osman'},now);
+room.players.push({name:'Companhia',hash:'b',ready:false,seen:now,finished:null});assert.equal(room.mode,'coop');
+const act=(seat,input)=>applyAction(room,seat,{encounter:room.journey.encounter,step:room.journey.step,...input},now++);
+assert.throws(()=>act(0,{action:'journey-reveal'}));for(let seat=0;seat<2;seat++)act(seat,{action:'ready',ready:true});now+=3000;
+const advance=()=>{const before=room.journey.step;act(0,{action:'journey-ready'});assert.equal(room.journey.step,before);act(1,{action:'journey-ready'});};
+for(let index=0;index<7;index++){
+ const e=encounters[index],j=room.journey;assert.equal(j.encounter,index);assert.equal(j.step,0);
+ const verses=scripture[e.id].verses;assert.ok(verses.length>=7);assert.match(scripture[e.id].source,/^https:\/\/ebible\.org\/porbrbsl\//);assert.equal(new Set(verses.map(v=>v.n)).size,verses.length);
+ verses.forEach((v,i)=>{assert.ok(v.text.length>5);assert.doesNotMatch(v.text,/<[^>]+>|\bclass=|fnCaller|onclick=/);if(i)assert.equal(v.n,verses[i-1].n+1);});
+ act(0,{action:'journey-pause',paused:true});assert.throws(()=>act(1,{action:'journey-reveal'}));assert.equal(publicRoom(room,1).journeyView.paused,true);act(1,{action:'journey-pause',paused:false});
+ assert.throws(()=>act(0,{action:'journey-ready'}));assert.throws(()=>act(0,{action:'journey-discover',choice:(e.answer+1)%3}));act(1,{action:'journey-discover',choice:e.answer});advance();assert.equal(j.step,1);
+ assert.throws(()=>act(0,{action:'journey-ready',step:0}));advance();assert.equal(j.step,2);
+ act(0,{action:'journey-choice',choice:(e.questions[0].answer+1)%3});assert.throws(()=>act(0,{action:'journey-ready'}));act(0,{action:'journey-choice',choice:e.questions[0].answer});act(1,{action:'journey-choice',choice:e.questions[1].answer});
+ const other=publicRoom(room,1);assert.equal(other.journey,undefined);assert.equal(other.journeyView.choices[0].choice,undefined);advance();assert.equal(j.step,3);
+ assert.throws(()=>act(0,{action:'journey-ready'}));const secret='Resposta privada '+index;
+ act(0,{action:'journey-note',field:'reflection',text:secret,shared:false});assert.equal(publicRoom(room,0).journeyView.notes[0].reflection.text,secret);assert.ok(!JSON.stringify(publicRoom(room,1)).includes(secret));
+ act(0,{action:'journey-note',field:'reflection',text:secret,shared:true});assert.ok(JSON.stringify(publicRoom(room,1)).includes(secret));act(0,{action:'journey-note',field:'reflection',text:secret,shared:false});
+ assert.throws(()=>act(0,{action:'journey-note',field:'reflection',text:'x'.repeat(1201)}));assert.throws(()=>act(0,{action:'journey-note',field:'commitment',text:'fora da etapa'}));
+ act(1,{action:'journey-note',field:'reflection',text:'',skipped:true});
+ if(e.message)for(let seat=0;seat<2;seat++)act(seat,{action:'journey-note',field:'message',text:'Obrigado por caminhar comigo',shared:true});else assert.throws(()=>act(0,{action:'journey-note',field:'message',text:'indisponível'}));
+ advance();assert.equal(j.step,4);assert.throws(()=>act(0,{action:'journey-ready'}));for(let seat=0;seat<2;seat++)act(seat,{action:'journey-note',field:'commitment',text:'',skipped:true});advance();assert.equal(j.finished,true);assert.equal(j.completed.length,index+1);
+ assert.ok(!JSON.stringify(publicRoom(room,1)).includes(secret));assert.equal(publicRoom(room,0).journeyView.completed[index].entries[0].reflection.text,secret);assert.throws(()=>act(0,{action:'journey-ready'}));
+ if(index<6){act(1,{action:'journey-next'});assert.throws(()=>act(0,{action:'journey-discover',encounter:index,choice:e.answer}));}else assert.throws(()=>act(0,{action:'journey-next'}));
+}
+const {buildBackup,validateBackup,mergeAlbums}=load('lib/album.ts'),{scenes}=load('lib/catalog.ts');
+const photo=scenes[0].id,record={id:'TESTROOM:0',photo,round:0,count:24,started:100,ended:200,winner:null,mode:'coop',players:['A','B'],rotation:false};
+const data={album:[photo],achievements:{[photo]:[record]},journey:publicRoom(room,0).journeyView.completed.map(r=>({...r,id:'JOURNEY1:'+r.encounter,seat:0}))};
+const redacted=buildBackup(data);assert.ok(!JSON.stringify(redacted).includes('Resposta privada'));assert.ok(JSON.stringify(redacted).includes('Obrigado por caminhar'));assert.equal(validateBackup(redacted).journey.length,7);
+const full=buildBackup(data,true);assert.ok(JSON.stringify(full).includes('Resposta privada 0'));full.token='never-export';full.journey[0].token='never-export';assert.ok(!JSON.stringify(validateBackup(full)).includes('never-export'));assert.ok(!JSON.stringify(buildBackup({...data,journey:full.journey},true)).includes('never-export'));
+const merged=mergeAlbums(data,validateBackup(full));assert.equal(merged.journey.length,7);assert.equal(merged.achievements[photo].length,1);
+const recovered=mergeAlbums(validateBackup(redacted),validateBackup(full));assert.equal(recovered.journey[0].entries[0].reflection.text,'Resposta privada 0');
+for(const invalid of [{...full,version:2},{...full,format:'other'},{...full,journey:[{...full.journey[0],encounter:7}]},{...full,puzzles:{...full.puzzles,records:{unknown:[record]}}}])assert.throws(()=>validateBackup(invalid));
+const {savedRoom,fetchSavedRoom}=load('lib/resume.ts');assert.equal(savedRoom('invalid'),null);assert.equal(savedRoom('{"code":"bad","kind":"journey"}'),null);assert.equal(savedRoom('{"code":"JOURNEY1","kind":"journey"}').code,'JOURNEY1');
+const realFetch=globalThis.fetch;let calls=[];globalThis.fetch=async(url,options)=>{calls.push({url,options});return Response.json(publicRoom(room,0));};
+const restored=await fetchSavedRoom('https://example.test/api/rooms','JOURNEY1','saved-token');assert.equal(restored.journeyView.encounter,6);assert.equal(calls[0].options.method,undefined);assert.equal(calls[0].options.headers['x-player-token'],'saved-token');
+await assert.rejects(fetchSavedRoom('url','JOURNEY1',''));assert.equal(calls.length,1);
+globalThis.fetch=async()=>new Response('',{status:404});await assert.rejects(fetchSavedRoom('url','JOURNEY1','token'),err=>err.expired===true);
+globalThis.fetch=async()=>{throw Error('offline');};await assert.rejects(fetchSavedRoom('url','JOURNEY1','token'),err=>!err.expired&&/continua salva/.test(err.message));globalThis.fetch=realFetch;
+console.log('Sete encontros completos: sincronização, pausa, pistas complementares, consentimento, privacidade atual e histórica, sete leituras integrais, backup com/sem respostas privadas, restauração sem duplicatas e retomada sem ocupar outra vaga.');

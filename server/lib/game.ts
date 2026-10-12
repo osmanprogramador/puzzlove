@@ -1,8 +1,9 @@
+import { newJourney, applyJourney, journeyView, type Journey } from './journey';
 import { levels, scenes } from './catalog';
 export type Piece = {x:number;y:number;placed:boolean;owner?:number;until?:number;group?:number;rotation?:number;by?:number;tray?:number;cursor?:{x:number;y:number}};
 export type Player = {name:string;hash:string;ready:boolean;seen:number;finished:number|null};
 export type RoundResult = {round:number;photo:string;count:number;started:number;ended:number;winner:number|null;players?:string[];mode?:string;rotation?:boolean};
-export type Room = {code:string;revision:number;kind:'puzzle'|'film';mode:'coop'|'race';photo:string;cols:number;rows:number;seed:number;created:number;started:number|null;players:Player[];boards:Piece[][];film:any;round:number;totalRounds:number;phase:'choosing'|'ready'|'playing'|'round-ended'|'match-ended';results:RoundResult[];rotation?:boolean;guesses?:Record<string,any[]>};
+export type Room = {code:string;revision:number;kind:'puzzle'|'film'|'journey';mode:'coop'|'race';photo:string;cols:number;rows:number;seed:number;created:number;started:number|null;players:Player[];boards:Piece[][];film:any;round:number;totalRounds:number;phase:'choosing'|'ready'|'playing'|'round-ended'|'match-ended';results:RoundResult[];rotation?:boolean;guesses?:Record<string,any[]>;journey?:Journey};
 // Older invitations retain their current puzzle and progress as a one-round match.
 export function normalizeRoom(room:Room) {
   if(room.round===undefined){room.round=0;room.totalRounds=1;room.results=[];room.phase=room.started?'playing':'ready';}
@@ -10,7 +11,7 @@ export function normalizeRoom(room:Room) {
 }
 export function initialRoom(code:string,hash:string,input:any,now=Date.now()):Room {
   const level=levels.find(l=>l.n===Number(input.count))||levels[0];
-  return {code,revision:0,kind:input.kind==='film'?'film':'puzzle',mode:input.mode==='race'?'race':'coop',photo:scenes.find(s=>s.id===input.photo)?.id||scenes[0].id,cols:level.cols,rows:level.rows,seed:crypto.getRandomValues(new Uint32Array(1))[0],created:now,started:null,players:[{name:cleanName(input.name),hash,ready:false,seen:now,finished:null}],boards:[Array.from({length:level.n},()=>({x:-1,y:-1,placed:false})),Array.from({length:level.n},()=>({x:-1,y:-1,placed:false}))],film:null,round:0,totalRounds:input.rounds===3?3:2,phase:input.kind==='film'?'ready':'choosing',results:[],rotation:input.rotation===true,guesses:{}};
+  return {code,revision:0,kind:input.kind==='journey'?'journey':input.kind==='film'?'film':'puzzle',mode:input.kind!=='journey'&&input.mode==='race'?'race':'coop',photo:scenes.find(s=>s.id===input.photo)?.id||scenes[0].id,cols:level.cols,rows:level.rows,seed:crypto.getRandomValues(new Uint32Array(1))[0],created:now,started:null,players:[{name:cleanName(input.name),hash,ready:false,seen:now,finished:null}],boards:[Array.from({length:level.n},()=>({x:-1,y:-1,placed:false})),Array.from({length:level.n},()=>({x:-1,y:-1,placed:false}))],film:null,round:0,totalRounds:input.rounds===3?3:2,phase:input.kind==='film'||input.kind==='journey'?'ready':'choosing',results:[],rotation:input.rotation===true,guesses:{},...(input.kind==='journey'?{journey:newJourney()}: {})};
 }
 export const cleanName=(name:any)=>typeof name==='string'&&name.trim()?name.trim().slice(0,24):'Visitante';
 export function applyAction(room:Room,seat:number,input:any,now=Date.now()) {
@@ -41,6 +42,7 @@ export function applyAction(room:Room,seat:number,input:any,now=Date.now()) {
     return;
   }
   if(!room.started||now<room.started)throw new Error('Aguardem os dois ficarem prontos.');
+  if(room.kind==='journey'){room.journey??=newJourney();applyJourney(room.journey,seat,input,room.players.map(p=>p.name),now);return;}
   if(input.action==='film') {
     if(room.kind!=='film'||seat!==0)throw new Error('O anfitrião controla as imagens e confere as lousas.');
     if(!input.snapshot||JSON.stringify(input.snapshot).length>90000)throw new Error('Estado de partida inválido.');
@@ -113,7 +115,7 @@ export function applyAction(room:Room,seat:number,input:any,now=Date.now()) {
 export function publicRoom(room:Room,seat:number) {
   normalizeRoom(room);
   const key=filmKey(room.film),all=key?room.guesses?.[key]||[[],[]]:[[],[]],revealed=room.film?.maxUnlockedStageIndex>=5||room.film?.answerRevealed;
-  return {...room,guesses:undefined,filmGuesses:{key,closed:!!room.film?.answerRevealed,own:all[seat]||[],players:all.map((list,i)=>revealed||i===seat?list:list.map((g:any)=>g?{stage:g.stage,submitted:true}:null))},boards:undefined,players:room.players.map(({hash,...p},i)=>({...p,online:Date.now()-p.seen<20000,progress:room.boards[room.mode==='coop'?0:i].filter(p=>p.placed).length})),pieces:room.boards[room.mode==='coop'?0:seat],seat};
+  return {...room,journey:undefined,journeyView:room.journey?journeyView(room.journey,seat):undefined,guesses:undefined,filmGuesses:{key,closed:!!room.film?.answerRevealed,own:all[seat]||[],players:all.map((list,i)=>revealed||i===seat?list:list.map((g:any)=>g?{stage:g.stage,submitted:true}:null))},boards:undefined,players:room.players.map(({hash,...p},i)=>({...p,online:Date.now()-p.seen<20000,progress:room.boards[room.mode==='coop'?0:i].filter(p=>p.placed).length})),pieces:room.boards[room.mode==='coop'?0:seat],seat};
 }
 
 export function groupIds(board:Piece[],id:number) {const group=board[id].group;return group===undefined?[id]:board.flatMap((p,i)=>p.group===group&&!p.placed?[i]:[]);}

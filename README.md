@@ -2,9 +2,9 @@
 
 Jogo online para duas pessoas, com salas por código de convite de 8 caracteres.
 
-[**▶ Jogar agora — filmes e quebra-cabeças**](https://osmanprogramador.github.io/puzzlove/)
+[**▶ Jogar agora — Puzzlove**](https://osmanprogramador.github.io/puzzlove/)
 
-1. A tela inicial oferece Quebra-cabeça e Qual é o Filme?. Escolha o jogo, preencha seu nome e crie a sala. Para um convite recebido, use Já tenho um código de convite.
+1. A tela inicial oferece Quebra-cabeça, Qual é o Filme? e Caminho a Dois. Escolha o jogo, preencha seu nome e crie a sala. Para um convite recebido, use Já tenho um código de convite.
 2. Envie o código ou o link do convite à outra pessoa. Ela informa o nome e entra.
 3. No quebra-cabeça, escolha 2 ou 3 rodadas. Quem cria escolhe a primeira foto e a quantidade de peças dentro da sala; a pessoa convidada escolhe a segunda; a terceira volta a quem criou.
 4. Cada participante clica em Estou pronto. Há uma contagem regressiva de 3 segundos.
@@ -33,7 +33,7 @@ O projeto original de filmes continua funcionando localmente e oferece o botão 
 
 Dez fotografias reais de Recife e Olinda, com vistas históricas e contemporâneas (datas de 1880 a 2024). Fontes, autores e licenças estão no catálogo, nos créditos e em public/photos/credits.json; o nome do destino e a fonte específica são revelados após a montagem. Não são fotos atuais de 2026. Não houve geração de cenas históricas por IA.
 
-As salas duram 7 dias desde a criação. Progresso e participantes ficam no D1 do servidor; o aparelho guarda apenas o token para reconectar. Volte pelo mesmo link e clique em Entrar no mesmo navegador. A sala aceita no máximo duas pessoas. Quem possuir o código pode ocupar uma vaga livre; não há listagem pública de salas.
+As salas duram 7 dias desde a criação. Progresso e participantes ficam no D1 do servidor; o aparelho guarda apenas o token para reconectar. Ao abrir o início ou o mesmo convite no navegador usado na partida, a sala é retomada automaticamente enquanto seu acesso estiver salvo. Sair da sala encerra essa retomada automática. A sala aceita no máximo duas pessoas. Quem possuir o código pode ocupar uma vaga livre; não há listagem pública de salas.
 
 ## Desenvolvimento
 
@@ -46,13 +46,13 @@ Verificação: node scripts/test-online.mjs testa duas conexões HTTP, sincroniz
 
 ## GitHub e hospedagem
 
-Este é um único site: a página inicial oferece Qual é o Filme? e Quebra-cabeça, com seus modos. O código pode ser mantido num repositório GitHub. O GitHub Pages sozinho não executa a API nem o D1 necessários às salas online; a versão completa usa um servidor Cloudflare Workers com D1 (o servidor das salas é publicado separadamente no Sites). O filme local pode funcionar num site estático, mas isso não substitui as salas sincronizadas. Não coloque .env, tokens, .sites-runtime, bancos locais, node_modules ou arquivos de saída no repositório.
+Este é um único site: a página inicial oferece Qual é o Filme?, Quebra-cabeça e Caminho a Dois, com seus modos. O código pode ser mantido num repositório GitHub. O GitHub Pages sozinho não executa a API nem o D1 necessários às salas online; a versão completa usa um servidor Cloudflare Workers com D1 (o servidor das salas é publicado separadamente no Sites). O filme local pode funcionar num site estático, mas isso não substitui as salas sincronizadas. Não coloque .env, tokens, .sites-runtime, bancos locais, node_modules ou arquivos de saída no repositório.
 
 Verificações adicionais: node scripts/test-rounds.mjs testa alternância e encerramento; node scripts/test-view.mjs confere o zoom em torno do ponto tocado e as dez fotos. As prévias responsivas devem cobrir celular em pé/deitado, tablet e desktop.
 
 ## Publicação pelo GitHub
 
-A interface completa é publicada em https://osmanprogramador.github.io/puzzlove/ pelo workflow Publicar o jogo. Inclui os dois jogos, as fotos e o álbum. npm run build:pages gera pages-dist. O servidor de salas permanece separado, com D1; PUZZLOVE_API_ORIGIN pode selecionar outro servidor na compilação. A API permite o acesso dessa interface pelo domínio https://osmanprogramador.github.io e mantém a identificação dos jogadores por token de sala. Não há redirecionamento para o servidor ao jogar.
+A interface completa é publicada em https://osmanprogramador.github.io/puzzlove/ pelo workflow Publicar o jogo. Inclui os três jogos, as fotos e os álbuns. npm run build:pages gera pages-dist. O servidor de salas permanece separado, com D1; PUZZLOVE_API_ORIGIN pode selecionar outro servidor na compilação. A API permite o acesso dessa interface pelo domínio https://osmanprogramador.github.io e mantém a identificação dos jogadores por token de sala. Não há redirecionamento para o servidor ao jogar.
 
 O endereço atual do servidor fica em vite.pages.config.ts e pode ser substituído por PUZZLOVE_API_ORIGIN na compilação. O servidor ativo é https://pecas-do-tempo-osman.osmananalisedesistem.chatgpt.site; o endereço público para jogar continua sendo o GitHub.
 
@@ -70,3 +70,22 @@ O código completo do servidor publicado está na pasta server/ do repositório 
 - Convite pelo WhatsApp, compartilhamento nativo quando disponível e QR code gerado no próprio navegador.
 
 Validação: testes de conjuntos, rotação, privacidade e rodadas em `scripts/test-features.mjs`; integração com dois participantes em `scripts/test-features-online.mjs` (usar TEST_URL para apontar ao servidor de teste).
+
+
+## Retomada, backup e sorteio
+
+A última sala e sua chave de acesso ficam salvas no navegador. Reabrir a página inicial ou o convite retoma a mesma vaga e o estado salvo no servidor, sem criar outro participante. Não existe recuperação do acesso em outro navegador sem sua chave. As salas continuam expirando sete dias depois da criação. Falha temporária de rede preserva o acesso para tentar novamente; uma sala expirada permite começar outra.
+
+O menu oferece **Sortear nosso próximo jogo**, que escolhe entre os três jogos e abre a configuração correspondente. O casal continua escolhendo os detalhes antes de criar a sala.
+
+**Backup dos nossos álbuns** baixa um arquivo JSON e restaura lembranças em outro navegador, sem duplicar as existentes. O arquivo inclui destinos descobertos, resultados das montagens e encontros concluídos. Respostas privadas só são exportadas se a pessoa marcar essa opção. Chaves das salas e rascunhos não são exportados. A restauração preserva textos já guardados e pode recuperar textos privados a partir de um backup completo da mesma pessoa. Limite de arquivo: 8 MB.
+
+## Caminho a Dois
+
+Jornada cooperativa com sete encontros: Jesus, oração, graça, perdão, confiança, amor e serviço. Cada encontro tem cinco momentos: descobrir a história por pistas, ler a passagem inteira e seu contexto, conversar sobre pistas diferentes, refletir em particular e escolher uma atitude possível com oração opcional. Os dois confirmam para avançar. Não há pontuação ou competição nas respostas pessoais.
+
+Cada pessoa pode pular uma pergunta, guardar só para si ou escolher compartilhar. O servidor filtra textos privados tanto na etapa atual quanto no histórico enviado à outra pessoa. Rascunhos permanecem no aparelho. Encontros concluídos, referências, textos bíblicos e mensagens formam o **Nosso álbum do caminho**, salvo neste navegador e incluído no backup conforme a escolha de privacidade.
+
+Leituras locais: Lucas 24:13–35; Mateus 6:5–13; Lucas 15:11–32; Mateus 18:21–35; Marcos 4:35–41; 1 Coríntios 13:1–7; João 13:1–17. Texto da Bíblia Portuguesa Mundial, tradução em revisão, domínio público, consultado em 11/10/2026 na [eBible](https://ebible.org/bible/details.php?id=porbrbsl). A origem de cada capítulo está em `lib/scripture.ts` e na tela de leitura. Explicações, desafios e perguntas são material de apoio do jogo; o casal pode usar sua própria Bíblia.
+
+Validação: `node scripts/test-journey.mjs` percorre os sete encontros e verifica consentimento, privacidade, avanço, pausa, passagens, backup, deduplicação e retomada autenticada. `node scripts/test-journey-online.mjs` testa uma jornada com dois clientes contra a API; use `TEST_URL` apenas com servidor de testes, pois o script cria salas.

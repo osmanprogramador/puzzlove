@@ -6,3 +6,5 @@ import '../app/journey.css';
 createRoot(document.getElementById('root')!).render(<Game/>);
 
 import '../app/cinema.css';
+
+import '../app/session.css';

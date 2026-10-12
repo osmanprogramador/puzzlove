@@ -25,3 +25,5 @@ export default function RootLayout({
 }
 
 import './cinema.css';
+
+import "./session.css";

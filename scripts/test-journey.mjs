@@ -16,7 +16,7 @@ for(let index=0;index<7;index++){
  const e=encounters[index],j=room.journey;assert.equal(j.encounter,index);assert.equal(j.step,0);
  const verses=scripture[e.id].verses;assert.ok(verses.length>=7);assert.match(scripture[e.id].source,/^https:\/\/ebible\.org\/porbrbsl\//);assert.equal(new Set(verses.map(v=>v.n)).size,verses.length);
  verses.forEach((v,i)=>{assert.ok(v.text.length>5);assert.doesNotMatch(v.text,/<[^>]+>|\bclass=|fnCaller|onclick=/);if(i)assert.equal(v.n,verses[i-1].n+1);});
- act(0,{action:'journey-pause',paused:true});assert.throws(()=>act(1,{action:'journey-reveal'}));assert.equal(publicRoom(room,1).journeyView.paused,true);act(1,{action:'journey-pause',paused:false});
+ act(0,{action:'journey-pause',paused:true});assert.throws(()=>act(1,{action:'journey-reveal'}));assert.equal(publicRoom(room,1).journeyView.paused,true);act(1,{action:'journey-pause',paused:false});assert.ok(room.pause);act(0,{action:'resume'});
  assert.throws(()=>act(0,{action:'journey-ready'}));assert.throws(()=>act(0,{action:'journey-discover',choice:(e.answer+1)%3}));act(1,{action:'journey-discover',choice:e.answer});advance();assert.equal(j.step,1);
  assert.throws(()=>act(0,{action:'journey-ready',step:0}));advance();assert.equal(j.step,2);
  act(0,{action:'journey-choice',choice:(e.questions[0].answer+1)%3});assert.throws(()=>act(0,{action:'journey-ready'}));act(0,{action:'journey-choice',choice:e.questions[0].answer});act(1,{action:'journey-choice',choice:e.questions[1].answer});
@@ -29,7 +29,7 @@ for(let index=0;index<7;index++){
  if(e.message)for(let seat=0;seat<2;seat++)act(seat,{action:'journey-note',field:'message',text:'Obrigado por caminhar comigo',shared:true});else assert.throws(()=>act(0,{action:'journey-note',field:'message',text:'indisponível'}));
  advance();assert.equal(j.step,4);assert.throws(()=>act(0,{action:'journey-ready'}));for(let seat=0;seat<2;seat++)act(seat,{action:'journey-note',field:'commitment',text:'',skipped:true});advance();assert.equal(j.finished,true);assert.equal(j.completed.length,index+1);
  assert.ok(!JSON.stringify(publicRoom(room,1)).includes(secret));assert.equal(publicRoom(room,0).journeyView.completed[index].entries[0].reflection.text,secret);assert.throws(()=>act(0,{action:'journey-ready'}));
- if(index<6){act(1,{action:'journey-next'});assert.throws(()=>act(0,{action:'journey-discover',encounter:index,choice:e.answer}));}else assert.throws(()=>act(0,{action:'journey-next'}));
+ if(index<6){act(1,{action:'journey-next'});for(let seat=0;seat<2;seat++)act(seat,{action:'ready',ready:true});now+=3001;assert.throws(()=>act(0,{action:'journey-discover',encounter:index,choice:e.answer}));}else assert.throws(()=>act(0,{action:'journey-next'}));
 }
 const {buildBackup,validateBackup,mergeAlbums}=load('lib/album.ts'),{scenes}=load('lib/catalog.ts');
 const photo=scenes[0].id,record={id:'TESTROOM:0',photo,round:0,count:24,started:100,ended:200,winner:null,mode:'coop',players:['A','B'],rotation:false};

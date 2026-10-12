@@ -103,3 +103,12 @@ Configuração, placar, sinopse opcional, seis pistas, conferência e resultado 
 A página das pistas ajusta a imagem ao espaço disponível entre o cabeçalho e os controles. A navegação e o palpite permanecem visíveis sem rolagem da página durante as pistas. A altura responde à tela, orientação e área visível do navegador. Em telas horizontais baixas, o cabeçalho da marca é recolhido e Sair da sala fica na barra do jogo. Sinopse abre em diálogo nativo com botão de fechar e Escape; histórico e convite são opcionais. Conferência e configuração podem mostrar conteúdos mais longos.
 
 Verificação de layout na prévia: larguras/alturas CSS 1365×768, 768×1024, 390×844, 320×666 e 768×480. Em todas, a altura do documento foi igual à da tela, não havia iframe e navegação, revelação e campo de palpite estavam dentro da área visível.
+# Partidas no mesmo ritmo
+
+Cada quebra-cabeça, título do cinema e novo encontro espera a confirmação das duas pessoas e uma contagem de 3 segundos. A fotografia inicial é carregada antes de habilitar a confirmação, sem revelar o destino surpresa; se o carregamento falhar, a tela permite continuar com o aviso.
+
+O botão **Pausar** está nos controles de cada jogo, inclusive na mesa e no cinema ampliados. Qualquer participante pode pausar: o servidor bloqueia as ações e solta as peças em movimento. Os dois confirmam **Estou pronto para retomar**. O tempo em pausa não entra na duração do quebra-cabeça.
+
+Ao encerrar uma partida, **Revanche na mesma sala** pede a confirmação dos dois e preserva o convite e os participantes. No quebra-cabeça, quem começou escolhendo muda a cada partida; no cinema, muda quem prepara e controla a sessão, mantendo categoria, quantidade e modo de pontuação como sugestões. O Caminho a Dois permite recomeçar os sete encontros. As conquistas anteriores permanecem no álbum do aparelho, com identificadores diferentes para cada revanche. Ações de partidas ou rodadas antigas são rejeitadas pelo servidor.
+
+Validação: `node scripts/test-session.mjs` e, com o servidor local iniciado, `node scripts/test-session-online.mjs`.

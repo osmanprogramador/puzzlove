@@ -4,7 +4,7 @@ import "./journey.css";
 
 export const metadata: Metadata = {
   title: "Peças do Tempo | Nossa mesa a dois",
-  description: "Quebra-cabeças, cinema e Caminho a Dois: encontros bíblicos cooperativos em salas para duas pessoas.",
+  description: "Quebra-cabeças, cinema, Caminho a Dois e Duelo das Palavras: jogos em salas para duas pessoas.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
@@ -27,3 +27,5 @@ export default function RootLayout({
 import './cinema.css';
 
 import "./session.css";
+
+import "./words.css";

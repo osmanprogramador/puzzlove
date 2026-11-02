@@ -38,8 +38,9 @@ async function postRoom(req:Request) {
       const room=normalizeRoom(JSON.parse(row.data) as Room);let seat=room.players.findIndex(p=>p.hash===digest);
       if(join) {
         if(seat<0) {
-          if(room.players.length>=2)return json({error:'Essa sala já tem duas pessoas. Use o aparelho em que entrou para reconectar.'},409);
-          seat=room.players.length;room.players.push({name:cleanName(input.name),hash:digest,ready:false,seen:Date.now(),finished:null});
+          const capacity=room.kind==='words'?room.words?.capacity||2:2;
+          if(room.players.length>=capacity||room.started)return json({error:'Essa sala já tem todos os participantes. Use o aparelho em que entrou para reconectar.'},409);
+          seat=room.players.length;room.rematchReady=Array(seat+1).fill(false);room.players.push({name:cleanName(input.name),hash:digest,ready:false,seen:Date.now(),finished:null});
         }else room.players[seat].seen=Date.now();
       }else {
         if(seat<0)return json({error:'Entre na sala primeiro.'},401);

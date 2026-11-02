@@ -1,6 +1,6 @@
 export type SavedRoom={code:string;kind:string};
 export function savedRoom(raw:string):SavedRoom|null {
- try{const r=JSON.parse(raw);return /^[A-Z0-9]{8}$/.test(r?.code)&&['puzzle','film','journey'].includes(r?.kind)?{code:r.code,kind:r.kind}:null;}catch{return null;}
+ try{const r=JSON.parse(raw);return /^[A-Z0-9]{8}$/.test(r?.code)&&['puzzle','film','journey','words'].includes(r?.kind)?{code:r.code,kind:r.kind}:null;}catch{return null;}
 }
 export async function fetchSavedRoom(url:string,code:string,token:string,signal?:AbortSignal):Promise<any> {
  if(!/^[A-Z0-9]{8}$/.test(code)||!token)throw Error('Este aparelho não tem o acesso salvo desta sala. Entre com o convite.');

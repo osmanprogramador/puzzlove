@@ -8,3 +8,5 @@ createRoot(document.getElementById('root')!).render(<Game/>);
 import '../app/cinema.css';
 
 import '../app/session.css';
+
+import '../app/words.css';

@@ -1,4 +1,4 @@
-import {newWordGame,applyWords,wordsView,type WordGame} from './words';
+import {newWordGame,applyWords,wordsView,normalizeWords,type WordGame} from './words';
 import { newJourney, applyJourney, journeyView, type Journey } from './journey';
 import { levels, scenes } from './catalog';
 export type Piece = {x:number;y:number;placed:boolean;owner?:number;until?:number;group?:number;rotation?:number;by?:number;tray?:number;cursor?:{x:number;y:number}};
@@ -8,6 +8,7 @@ export type Room = {code:string;revision:number;kind:'puzzle'|'film'|'journey'|'
 // Older invitations retain their current puzzle and progress as a one-round match.
 export function normalizeRoom(room:Room) {
   if(room.round===undefined){room.round=0;room.totalRounds=1;room.results=[];room.phase=room.started?'playing':'ready';}
+  if(room.words)normalizeWords(room.words,room.players[0].name);
   room.match??=0;room.turn??=0;room.rematchReady??=Array(room.kind==='words'?room.words?.capacity||2:2).fill(false);room.pause??=null;
   // Carry pauses from invitations created by the previous journey engine.
   if(room.journey?.paused&&!room.pause)room.pause={at:Date.now(),by:0,ready:room.players.map(()=>false)};
@@ -34,7 +35,7 @@ export function applyAction(room:Room,seat:number,input:any,now=Date.now()) {
       room.boards=[0,1].map(()=>Array.from({length:room.cols*room.rows},()=>({x:-1,y:-1,placed:false})));
       room.players.forEach(p=>{p.ready=false;p.finished=null;});
       if(room.kind==='journey')room.journey=newJourney();
-      if(room.kind==='words')room.words=newWordGame({wordLevel:room.words?.level,wordCount:room.words?.count,wordMode:room.words?.mode,wordJudging:room.words?.judging||'circle',wordPlayers:room.words?.capacity,wordNames:room.words?.names},room.words?.deck);
+      if(room.kind==='words')room.words=newWordGame({wordLevel:room.words?.level,wordCount:room.words?.count,wordMode:room.words?.mode,wordJudging:room.words?.judging||'circle',wordPlayers:room.words?.judgeOnly?room.words.scores.length:room.words?.capacity,wordNames:room.words?.names,name:room.players[0].name},room.words?.deck);
     }
     return;
   }

@@ -41,34 +41,39 @@ const old=room.words.deck,hashes=room.players.map(p=>p.hash);act(0,{action:'rema
 if(fs.existsSync('lib/resume.ts')){const {savedRoom}=load('lib/resume.ts');assert.equal(savedRoom('{"code":"WORDTEST","kind":"words"}').kind,'words');}
 console.log('Duelo: 100 verbetes (30 médios e 70 difíceis), níveis e sorteios sem repetição, respostas/definições/futuras palavras ocultas, duas confirmações, pausa, 1/0,5/0 pontos sem acúmulo, passe, proteção de avaliação própria, pontuação única, resumo, retomada e revanche.');
 
-// New rooms: the host records every score; groups must fill the chosen capacity.
-for(const size of [3,4]){
- const group=normalizeRoom(initialRoom('GROUP'+size,'host',{kind:'words',wordPlayers:size,wordCount:5,name:'Anfitrião'},now));
- for(let i=1;i<size;i++)group.players.push({name:'Pessoa '+i,hash:'hash-'+i,ready:false,seen:now,finished:null});
+
+// A judge owns the room and never has an answer or score slot.
+for(const size of [2,3,4]){
+ const group=normalizeRoom(initialRoom('JUDGE'+size,'judge',{kind:'words',wordPlayers:size,wordCount:5,name:'Juiz'},now));
+ for(let i=1;i<=size;i++)group.players.push({name:'Jogador '+i,hash:'hash-'+i,ready:false,seen:now,finished:null});
  const go=(seat,input)=>applyAction(group,seat,{match:group.match,turn:group.turn,wordRound:group.words.index,...input},now++);
- assert.equal(group.words.judging,'host');assert.equal(group.words.capacity,size);assert.equal(group.words.scores.length,size);
- for(let i=0;i<size;i++){go(i,{action:'ready',ready:true});if(i<size-1)assert.equal(group.started,null);}now+=3001;
- go(size-1,{action:'pause'});for(let i=0;i<size;i++){go(i,{action:'resume'});if(i<size-1)assert.ok(group.pause);}assert.equal(group.pause,null);
- for(let i=0;i<size;i++){go(i,{action:'words-answer',text:'Segredo da pessoa '+i});if(i<size-1){assert.equal(group.words.stage,'writing');const view=publicRoom(group,size-1).wordsView;assert.equal(view.word.meaning,undefined);assert.equal(view.answers[0].text,undefined);}}
- assert.equal(group.words.stage,'judging');assert.equal(publicRoom(group,2).wordsView.names.length,size);assert.ok(publicRoom(group,2).wordsView.word.meaning);
+ assert.equal(group.words.capacity,size+1);assert.equal(group.words.scores.length,size);assert.equal(group.words.judgeOnly,true);
+ for(let i=0;i<=size;i++){go(i,{action:'ready',ready:true});if(i<size)assert.equal(group.started,null);}now+=3001;
+ assert.throws(()=>go(0,{action:'words-answer',text:'Sou juiz'}));assert.throws(()=>go(0,{action:'words-answer',passed:true}));assert.throws(()=>go(0,{action:'words-reveal'}));
+ go(size,{action:'pause'});for(let i=0;i<=size;i++){go(i,{action:'resume'});if(i<size)assert.ok(group.pause);}assert.equal(group.pause,null);
+ for(let i=1;i<=size;i++){
+  go(i,{action:'words-answer',text:'Segredo '+i});const judge=publicRoom(group,0).wordsView;
+  assert.equal(judge.answers[i-1].text,undefined);assert.equal(judge.word.meaning,undefined);assert.equal(judge.stage,'writing');
+  assert.equal(publicRoom(group,i).wordsView.answers[i-1].text,'Segredo '+i);
+  if(i<size)assert.throws(()=>go(0,{action:'words-reveal'}));
+ }
+ const judge=publicRoom(group,0).wordsView;assert.equal(judge.isJudge,true);assert.equal(judge.playerIndex,-1);assert.equal(judge.canReveal,true);assert.ok(!judge.names.includes('Juiz'));assert.equal(judge.names.length,size);
+ assert.throws(()=>go(1,{action:'words-reveal'}));assert.throws(()=>go(1,{action:'words-local-reveal'}));go(0,{action:'words-reveal'});assert.ok(publicRoom(group,1).wordsView.word.meaning);assert.equal(publicRoom(group,0).wordsView.answers[0].text,'Segredo 1');
  assert.throws(()=>go(1,{action:'words-grade',target:0,grade:2}));assert.throws(()=>go(1,{action:'words-confirm'}));assert.throws(()=>go(0,{action:'words-confirm'}));assert.throws(()=>go(0,{action:'words-grade',target:size,grade:2}));
- for(let i=0;i<size;i++)go(0,{action:'words-grade',target:i,grade:i%3});
- go(0,{action:'words-grade',target:0,grade:2});go(0,{action:'words-grade',target:0,grade:1});go(0,{action:'words-confirm'});
- assert.equal(group.words.scores[0],1);assert.equal(group.words.history.length,1);assert.throws(()=>go(0,{action:'words-confirm'}));assert.throws(()=>go(1,{action:'words-next'}));
- go(0,{action:'words-next'});assert.equal(group.started,null);assert.equal(group.words.answers.length,size);assert.ok(group.players.every(p=>!p.ready));
+ for(let i=0;i<size;i++)go(0,{action:'words-grade',target:i,grade:i%3});go(0,{action:'words-grade',target:0,grade:1});go(0,{action:'words-confirm'});
+ assert.equal(group.words.scores[0],1);assert.equal(group.words.scores.length,size);assert.throws(()=>go(0,{action:'words-confirm'}));assert.throws(()=>go(1,{action:'words-next'}));go(0,{action:'words-next'});assert.equal(group.words.answers.length,size);
 }
-const names=Array.from({length:25},(_,i)=>'Pessoa '+(i+1));
-assert.throws(()=>newWordGame({wordMode:'local',wordNames:['Uma pessoa']}));
-const table=normalizeRoom(initialRoom('LOCAL001','coordinator',{kind:'words',wordMode:'local',wordNames:names,wordCount:5,name:'Mesa'},now));
+const table=normalizeRoom(initialRoom('LOCAL001','judge',{kind:'words',wordMode:'local',wordNames:['Juiz',...Array.from({length:25},(_,i)=>'Pessoa '+(i+1))],wordCount:5,name:'Juiz'},now));
+assert.equal(table.words.names.length,25);assert.ok(!table.words.names.includes('Juiz'));assert.equal(table.words.capacity,1);
+assert.throws(()=>newWordGame({wordMode:'local',wordNames:['Juiz'],name:'Juiz'}));
 const localAct=input=>applyAction(table,0,{match:table.match,turn:table.turn,wordRound:table.words.index,...input},now++);
-assert.equal(table.words.capacity,1);assert.equal(table.words.scores.length,25);assert.equal(publicRoom(table,0).wordsView.names.length,25);
 for(let i=0;i<5;i++){
- localAct({action:'ready',ready:true});now+=3001;assert.equal(publicRoom(table,0).wordsView.word.meaning,undefined);
- assert.throws(()=>localAct({action:'words-answer',text:'No papel'}));assert.throws(()=>localAct({action:'words-confirm'}));
- localAct({action:'words-local-reveal'});assert.ok(publicRoom(table,0).wordsView.word.meaning);assert.equal(table.words.answers.filter(Boolean).length,0);
- for(let seat=0;seat<25;seat++)localAct({action:'words-grade',target:seat,grade:seat%3});
- localAct({action:'words-confirm'});assert.equal(table.words.history.length,i+1);assert.throws(()=>localAct({action:'words-confirm'}));
- if(i<4)localAct({action:'words-next'});
+ localAct({action:'ready',ready:true});now+=3001;assert.equal(publicRoom(table,0).wordsView.word.meaning,undefined);assert.throws(()=>localAct({action:'words-answer',text:'No papel'}));
+ localAct({action:'words-local-reveal'});for(let j=0;j<25;j++)localAct({action:'words-grade',target:j,grade:j%3});localAct({action:'words-confirm'});assert.throws(()=>localAct({action:'words-confirm'}));if(i<4)localAct({action:'words-next'});
 }
-assert.equal(table.phase,'match-ended');assert.equal(table.words.scores[1],5);localAct({action:'rematch',ready:true});assert.equal(table.match,1);assert.equal(table.words.names.length,25);assert.equal(table.words.capacity,1);assert.ok(table.words.scores.every(score=>score===0));
-console.log('Grupos: 3/4 online, prontidão e pausa de todos, segredos até último envio, apenas anfitrião avalia/confirma/avança; presencial com 25 pessoas, respostas no papel, revelação manual, placar único e revanche preservando participantes.');
+assert.equal(table.words.scores[1],5);localAct({action:'rematch',ready:true});assert.equal(table.match,1);assert.equal(table.words.names.length,25);assert.ok(table.words.scores.every(score=>score===0));
+// Upgrade host-as-player rooms without erasing other players' totals or history.
+const legacy=normalizeRoom(initialRoom('OLDJUDGE','h',{kind:'words',wordPlayers:2,name:'Organizador'},now));
+legacy.players.push({name:'Luane',hash:'b',ready:false,seen:now,finished:null});legacy.words.judgeOnly=undefined;legacy.words.capacity=2;legacy.words.scores=[10,7];legacy.words.answers=[{text:'Antiga do juiz',passed:false},{text:'Da Luane',passed:false}];legacy.words.grades=[2,1];legacy.words.history=[{index:0,word:legacy.words.deck[0],answers:[...legacy.words.answers],grades:[2,1],ended:now}];
+normalizeRoom(legacy);assert.equal(legacy.words.judgeOnly,true);assert.deepEqual([...legacy.words.scores],[7]);assert.equal(legacy.words.answers[0].text,'Da Luane');assert.deepEqual([...legacy.words.history[0].grades],[1]);assert.deepEqual([...publicRoom(legacy,0).wordsView.names],['Luane']);normalizeRoom(legacy);assert.equal(legacy.words.scores[0],7);
+console.log('Juiz separado: 2/3/4 jogadores + organizador; juiz não responde nem pontua, só revela após todos enviarem; 25 presenciais sem juiz na lista; migração preserva placares e histórico dos jogadores.');

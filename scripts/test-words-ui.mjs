@@ -28,19 +28,19 @@ html=render();assert.match(html,/Pessoa B venceu o duelo!/);assert.match(html,/R
 const jsDir=path.resolve('.sites-runtime/feature-preview/assets');if(fs.existsSync(jsDir)){const code=fs.readdirSync(jsDir).filter(n=>n.endsWith('.js')).map(n=>fs.readFileSync(path.join(jsDir,n),'utf8')).join('');assert.ok(!code.includes('O investigador sagaz encontrou uma pista no bilhete.'));assert.ok(!code.includes('Traço particular do comportamento'));}
 console.log('Interface renderizada: quarto jogo no menu, espera sem revelar palavra, escrita/revelação/avaliação/resultado, pontos com vírgula, resumo, respostas escapadas e catálogo privado fora do JavaScript público. Validação visual no navegador permanece separada.');
 
-for(const size of [3,4]){
- const group=normalizeRoom(initialRoom('UIGROUP1','h',{kind:'words',wordPlayers:size,name:'Anfitrião'},now));
- for(let i=1;i<size;i++)group.players.push({name:'Convidado '+i,hash:'h'+i,ready:false,seen:now,finished:null});
+
+for(const size of [2,4]){
+ const group=normalizeRoom(initialRoom('UIJUDGE1','h',{kind:'words',wordPlayers:size,name:'Organizador'},now));
+ for(let i=1;i<=size;i++)group.players.push({name:'Jogador '+i,hash:'h'+i,ready:false,seen:now,finished:null});
  const go=(seat,input)=>applyAction(group,seat,{match:0,turn:group.turn,wordRound:0,...input},now++);
- for(let i=0;i<size;i++)go(i,{action:'ready',ready:true});now+=3001;
+ for(let i=0;i<=size;i++)go(i,{action:'ready',ready:true});now+=3001;
  const draw=seat=>renderToStaticMarkup(React.createElement(Duel,{room:publicRoom(group,seat),act:async()=>{},connected:true,onPause:()=>{}}));
- let page=draw(0);assert.match(page,/Convidado 2/);assert.match(page,/Seu significado secreto/);
- for(let i=0;i<size;i++)go(i,{action:'words-answer',text:'Resposta '+i});
- page=draw(0);assert.match(page,/Registre os pontos da rodada/);assert.equal((page.match(/word-person-grade/g)||[]).length,size);assert.match(page,/Confirmar placar da rodada/);
- const guest=draw(1);assert.match(guest,/Aguardando o placar/);assert.ok(!guest.includes('word-person-grade'));assert.ok(!guest.includes('Confirmar placar da rodada'));
+ let judge=draw(0);assert.match(judge,/Você organiza esta rodada/);assert.ok(!judge.includes('<textarea'));assert.match(judge,/Não responde nem participa do placar/);assert.match(draw(1),/Seu significado secreto/);
+ for(let i=1;i<=size;i++)go(i,{action:'words-answer',text:'Resposta '+i});judge=draw(0);assert.match(judge,/Todos responderam/);assert.ok(!judge.includes('VAMOS DESCOBRIR'));
+ go(0,{action:'words-reveal'});judge=draw(0);assert.match(judge,/Registre os pontos da rodada/);assert.equal((judge.match(/word-person-grade/g)||[]).length,size);assert.ok(!draw(1).includes('word-person-grade'));
 }
-const table=normalizeRoom(initialRoom('UITABLE1','h',{kind:'words',wordMode:'local',wordNames:Array.from({length:25},(_,i)=>'Participante '+(i+1)),name:'Mesa'},now));
+const table=normalizeRoom(initialRoom('UITABLE1','h',{kind:'words',wordMode:'local',wordNames:['Organizador',...Array.from({length:25},(_,i)=>'Participante '+(i+1))],name:'Organizador'},now));
 applyAction(table,0,{action:'ready',ready:true},now);now+=3001;
 let paper=renderToStaticMarkup(React.createElement(Duel,{room:publicRoom(table,0),act:async()=>{},connected:true,onPause:()=>{}}));assert.ok(!paper.includes('<textarea'));assert.match(paper,/Todos escreveram · revelar significado/);assert.match(paper,/Participante 25/);assert.ok(!paper.includes('VAMOS DESCOBRIR'));
-applyAction(table,0,{action:'words-local-reveal',wordRound:0},now++);paper=renderToStaticMarkup(React.createElement(Duel,{room:publicRoom(table,0),act:async()=>{},connected:true,onPause:()=>{}}));assert.match(paper,/Registre os pontos da rodada/);assert.equal((paper.match(/word-person-grade/g)||[]).length,25);
-console.log('Interface dos grupos: 3/4 online com avaliação exclusiva do anfitrião; mesa presencial com 25 nomes, sem campo de resposta, revelação e avaliação por pessoa.');
+applyAction(table,0,{action:'words-local-reveal',wordRound:0},now++);paper=renderToStaticMarkup(React.createElement(Duel,{room:publicRoom(table,0),act:async()=>{},connected:true,onPause:()=>{}}));assert.equal((paper.match(/word-person-grade/g)||[]).length,25);
+console.log('Interface: juiz sem campo de resposta e fora do placar; participantes respondem; revelação manual pelo juiz; 25 jogadores presenciais.');

@@ -24,7 +24,7 @@ async function postRoom(req:Request) {
     const raw=await req.text();if(raw.length>100000)return json({error:'Pedido muito grande.'},413);
     const input=JSON.parse(raw);let token=req.headers.get('x-player-token')||'';
     if(input.action==='create') {
-      token=random(48);const code=random(8),room=initialRoom(code,await hash(token),input);
+      token=random(48);const code=random(8),room=initialRoom(code,await hash(token),input.kind==='words'?{...input,wordJudging:'host'}:input);
       await env.DB!.prepare('INSERT INTO rooms(code,revision,data,expires) VALUES(?,?,?,?)').bind(code,0,JSON.stringify(room),Date.now()+7*86400000).run();
       await env.DB!.prepare('DELETE FROM rooms WHERE code IN (SELECT code FROM rooms WHERE expires<? LIMIT 100)').bind(Date.now()).run();
       return json({room:publicRoom(room,0),token});

@@ -1,6 +1,6 @@
 # Peças do Tempo
 
-Jogos com salas por código de convite de 8 caracteres. Quebra-cabeças, cinema e jornada são para duas pessoas; o Duelo das Palavras aceita de 2 a 4 online e grupos presenciais com lista livre.
+Jogos com salas por código de convite de 8 caracteres. Quebra-cabeças, cinema e jornada são para duas pessoas; o Duelo das Palavras aceita de 2 a 4 jogadores online, além do juiz e grupos presenciais com lista livre.
 
 [**▶ Jogar agora — Puzzlove**](https://osmanprogramador.github.io/puzzlove/)
 
@@ -13,10 +13,10 @@ Jogos com salas por código de convite de 8 caracteres. Quebra-cabeças, cinema 
 
 Catálogo de 100 palavras: 30 médias e 70 difíceis, com partidas de 5, 10 ou 15 palavras e sorteio sem repetição. Na revanche, têm prioridade as palavras que não saíram na partida anterior.
 
-- **Online:** escolha 2, 3 ou 4 pessoas. Cada participante entra em seu aparelho pelo convite. A palavra abre após todos confirmarem; respostas e significado ficam ocultos até o último envio. Quem criou a sala registra os pontos de todos, inclusive os próprios, após a conversa do grupo. Somente essa pessoa confirma o placar e avança. Todos confirmam para retomar uma pausa e iniciar uma revanche.
-- **Presencial:** informe um nome por linha, sem limite fixo de participantes. Um único aparelho conectado à internet sorteia e mostra a palavra. Todos escrevem no papel; o responsável revela o significado quando terminarem e registra o placar de cada pessoa. As respostas em papel não são digitadas nem armazenadas. A mesa pode ser retomada no mesmo aparelho.
+- **Online:** escolha 2, 3 ou 4 jogadores, além do juiz. Cada participante entra em seu aparelho pelo convite. A palavra abre após todos confirmarem; respostas e significado ficam ocultos até o último envio. Quem criou a sala é somente o juiz: não responde e não aparece no placar. O juiz revela as respostas e o significado após todos os jogadores enviarem, registra os pontos e confirma o placar. Somente essa pessoa confirma o placar e avança. Todos confirmam para retomar uma pausa e iniciar uma revanche.
+- **Presencial:** informe um nome por linha, sem limite fixo de jogadores, deixando o nome do juiz fora da lista. Um único aparelho conectado à internet sorteia e mostra a palavra. Todos escrevem no papel; o responsável revela o significado quando terminarem e registra o placar de cada pessoa. As respostas em papel não são digitadas nem armazenadas. A mesa pode ser retomada no mesmo aparelho.
 - **Pontuação:** 1 ponto por acerto, 0,5 por criatividade mesmo ao errar, ou zero por erro/passe. Uma única opção por resposta; não há bônus acumulado. O placar só soma quando o responsável confirma todas as avaliações, uma única vez.
-- Inclui explicação curta, exemplo original e link para o Dicionário Priberam após a revelação, resumo final, pausa, retomada e revanche. Salas antigas com avaliação entre duas pessoas continuam compatíveis.
+- Inclui explicação curta, exemplo original e link para o Dicionário Priberam após a revelação, resumo final, pausa, retomada e revanche. Salas antigas em que o anfitrião também jogava são convertidas: o organizador sai do placar, preservando os pontos e o histórico dos demais. Convites antigos com avaliação entre duas pessoas continuam compatíveis.
 
 
 ## Quebra-cabeças — detalhes

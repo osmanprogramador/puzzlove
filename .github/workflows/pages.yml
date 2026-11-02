@@ -27,6 +27,7 @@ jobs:
       - run: node scripts/test-features.mjs
       - run: node scripts/test-journey.mjs
       - run: node scripts/test-session.mjs
+      - run: node scripts/test-end.mjs
       - run: node scripts/test-words.mjs
       - run: node scripts/test-words-ui.mjs
       - run: node scripts/test-cinema.mjs

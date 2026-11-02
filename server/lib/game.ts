@@ -4,7 +4,7 @@ import { levels, scenes } from './catalog';
 export type Piece = {x:number;y:number;placed:boolean;owner?:number;until?:number;group?:number;rotation?:number;by?:number;tray?:number;cursor?:{x:number;y:number}};
 export type Player = {name:string;hash:string;ready:boolean;seen:number;finished:number|null};
 export type RoundResult = {round:number;photo:string;count:number;started:number;ended:number;winner:number|null;players?:string[];mode?:string;rotation?:boolean};
-export type Room = {code:string;revision:number;kind:'puzzle'|'film'|'journey'|'words';mode:'coop'|'race';photo:string;cols:number;rows:number;seed:number;created:number;started:number|null;players:Player[];boards:Piece[][];film:any;round:number;totalRounds:number;phase:'choosing'|'ready'|'playing'|'round-ended'|'match-ended';results:RoundResult[];filmSettings?:{selectedCategory:string;requestedRounds:number;scoringMode:string};match?:number;turn?:number;pause?:{at:number;by:number;ready:boolean[]}|null;rematchReady?:boolean[];rotation?:boolean;guesses?:Record<string,any[]>;journey?:Journey;words?:WordGame};
+export type Room = {endedEarly?:{at:number;by:number;elapsed:number};code:string;revision:number;kind:'puzzle'|'film'|'journey'|'words';mode:'coop'|'race';photo:string;cols:number;rows:number;seed:number;created:number;started:number|null;players:Player[];boards:Piece[][];film:any;round:number;totalRounds:number;phase:'choosing'|'ready'|'playing'|'round-ended'|'match-ended';results:RoundResult[];filmSettings?:{selectedCategory:string;requestedRounds:number;scoringMode:string};match?:number;turn?:number;pause?:{at:number;by:number;ready:boolean[]}|null;rematchReady?:boolean[];rotation?:boolean;guesses?:Record<string,any[]>;journey?:Journey;words?:WordGame};
 // Older invitations retain their current puzzle and progress as a one-round match.
 export function normalizeRoom(room:Room) {
   if(room.round===undefined){room.round=0;room.totalRounds=1;room.results=[];room.phase=room.started?'playing':'ready';}
@@ -26,11 +26,22 @@ export function applyAction(room:Room,seat:number,input:any,now=Date.now()) {
   if(input.match!==undefined&&input.match!==room.match||(room.match||0)>0&&input.match===undefined)throw new Error('A partida mudou. Aguarde a atualização da sala.');
   if(input.turn!==undefined&&input.turn!==room.turn)throw new Error('A rodada mudou. Aguarde a atualização da sala.');
   const finished=matchFinished(room);
+  if(input.action==='end-match') {
+    if(room.kind==='words'&&seat!==0||room.kind==='film'&&seat!==(room.match||0)%2)throw Error('Somente quem organiza esta partida pode encerrá-la.');
+    if(input.confirmed!==true)throw Error('Confirme o encerramento da partida.');
+    if(finished)return;
+    room.endedEarly={at:now,by:seat,elapsed:room.started?Math.max(0,(room.pause?.at??now)-room.started):0};
+    room.phase='match-ended';room.pause=null;room.turn=(room.turn||0)+1;
+    room.players.forEach(p=>p.finished??=now);
+    room.boards.forEach(board=>board.forEach(p=>{delete p.owner;delete p.until;delete p.cursor;}));
+    return;
+  }
+  if(room.endedEarly&&input.action!=='rematch')throw Error('A partida foi encerrada. Confirme uma revanche para jogar novamente.');
   if(input.action==='rematch') {
     if(!finished||room.players.length!==(room.kind==='words'?room.words?.capacity||2:2))throw new Error('Concluam a partida antes de pedir uma revanche.');
     room.rematchReady![seat]=input.ready===true;
     if(room.rematchReady!.every(Boolean)) {
-      room.match!++;room.turn!++;room.round=0;room.started=null;room.results=[];room.filmSettings=room.film?{selectedCategory:room.film.selectedCategory,requestedRounds:room.film.requestedRounds,scoringMode:room.film.scoringMode}:room.filmSettings;room.film=null;room.guesses={};room.pause=null;room.rematchReady=room.players.map(()=>false);
+      delete room.endedEarly;room.match!++;room.turn!++;room.round=0;room.started=null;room.results=[];room.filmSettings=room.film?{selectedCategory:room.film.selectedCategory,requestedRounds:room.film.requestedRounds,scoringMode:room.film.scoringMode}:room.filmSettings;room.film=null;room.guesses={};room.pause=null;room.rematchReady=room.players.map(()=>false);
       room.phase=room.kind==='puzzle'?'choosing':'ready';
       room.boards=[0,1].map(()=>Array.from({length:room.cols*room.rows},()=>({x:-1,y:-1,placed:false})));
       room.players.forEach(p=>{p.ready=false;p.finished=null;});
@@ -173,5 +184,5 @@ export function groupIds(board:Piece[],id:number) {const group=board[id].group;r
 export function filmKey(film:any) {return film?.deck?.[film.currentRoundIndex]?`${film.sessionId||film.deck.join(',')}:${film.currentRoundIndex}:${film.deck[film.currentRoundIndex]}`:'';}
 
 export function puzzleChooser(room:Room){return ((room.match||0)+room.round)%2;}
-export function matchFinished(room:Room){return room.kind==='words'?room.words?.stage==='finished':room.kind==='puzzle'?room.phase==='match-ended':room.kind==='film'?room.film?.screen==='victory':!!room.journey?.finished&&room.journey.encounter===6;}
+export function matchFinished(room:Room){return !!room.endedEarly|| (room.kind==='words'?room.words?.stage==='finished':room.kind==='puzzle'?room.phase==='match-ended':room.kind==='film'?room.film?.screen==='victory':!!room.journey?.finished&&room.journey.encounter===6);}
 function awaitReady(room:Room){room.phase='ready';room.started=null;room.turn=(room.turn||0)+1;room.players.forEach(p=>{p.ready=false;p.finished=null;});}

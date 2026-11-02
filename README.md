@@ -122,3 +122,10 @@ O botão **Pausar** está nos controles de cada jogo, inclusive na mesa e no cin
 Ao encerrar uma partida, **Revanche na mesma sala** pede a confirmação dos dois e preserva o convite e os participantes. No quebra-cabeça, quem começou escolhendo muda a cada partida; no cinema, muda quem prepara e controla a sessão, mantendo categoria, quantidade e modo de pontuação como sugestões. O Caminho a Dois permite recomeçar os sete encontros. As conquistas anteriores permanecem no álbum do aparelho, com identificadores diferentes para cada revanche. Ações de partidas ou rodadas antigas são rejeitadas pelo servidor.
 
 Validação: `node scripts/test-session.mjs` e, com o servidor local iniciado, `node scripts/test-session-online.mjs`.
+
+
+## Encerrar e ver o resultado final
+
+Todos os jogos têm **Encerrar partida**, com confirmação antes de finalizar para toda a sala. No cinema, o botão fica também na barra do jogo e funciona na tela ampliada. Durante uma pausa, pode ser acessado pelo diálogo de pausa.
+
+No Duelo, apenas o juiz encerra. No cinema, quem controla a sessão encerra. No quebra-cabeça e na jornada, qualquer participante pode encerrar. O resultado mostra somente pontuação registrada e desafios concluídos; uma rodada com avaliação incompleta não soma pontos. Montagens e encontros incompletos não entram no álbum como concluídos. O resultado fica na sala e há opção de revanche com os mesmos participantes.
